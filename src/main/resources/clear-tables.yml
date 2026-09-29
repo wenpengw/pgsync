@@ -1,0 +1,9 @@
+# 目标表数据清空清单（只列表名，源表名 = 目标表名，均为 public schema）
+# 用途：SyncManualTest#clearTargetTables() 清空此处列出的【目标库】表数据，不读源库、不改表结构
+# 清空方式由 application.yml 的 full-overwrite.clear-strategy 决定（DELETE / TRUNCATE）
+# 不想清空的表，行首加 # 注释掉即可（与 sync-tables.yml 同风格）
+# 注意：本清单是「全量目标库表名」（1073 张，已去重），请确认目标表后续会被重新同步，否则会造成数据丢失
+pgsync:
+  clear:
+    tables:
+    - t_pom_mftorder

@@ -1,0 +1,13 @@
+# 表同步清单（只列表名，源表名 = 目标表名，均为 public schema）
+# 临时停用某张表，前面加 # 注释即可
+# 全表清单已按 ASCII 字母顺序排序并去掉重复表名（不加 # 的即为生效表）
+pgsync:
+#  基于主键 upsert，保留历史数据
+#  mode: UPSERT_MERGE
+#  同步前清空目标表再全量导入
+  mode: FULL_OVERWRITE
+#  按主键，忽略已经存在的数据
+#  mode: INSERT_SKIP_EXISTING
+
+  tables:
+#    - t_ar_revcfmbill

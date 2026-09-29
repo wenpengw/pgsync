@@ -1,0 +1,68 @@
+spring:
+  config:
+    # 注意：import 进来的文件优先级高于本文件（例如 sync-tables.yml 里的 pgsync.mode 会覆盖下面同名的值）
+    import: classpath:sync-tables.yml,classpath:clear-tables.yml
+  main:
+    banner-mode: off
+
+server:
+  port: 8080
+
+pgsync:
+  # ===== 数据源 =====
+  source:
+    jdbc-url: jdbc:postgresql://localhost:5432/dev_local_5_all?currentSchema=public&sslmode=disable
+    username: postgres
+    password: 123456
+    hikari:
+      maximum-pool-size: 4
+      read-only: true
+      connection-timeout: 30000
+      max-lifetime: 1800000
+  # 目标库：本机 localhost:5432，库名 dev_local_5_all
+  target:
+    jdbc-url: jdbc:postgresql://localhost:5432/dev_local_5_all?currentSchema=public&sslmode=disable
+    username: postgres
+    password: 123456
+    hikari:
+      maximum-pool-size: 8
+      auto-commit: false
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
+  # ===== 全局参数 =====
+  schema: public
+  batch-size: 1000
+  fetch-size: 1000
+  mode: UPSERT_MERGE          # UPSERT_MERGE | FULL_OVERWRITE
+  fail-fast: false
+  # 无主键表策略：AUTO_FULL_OVERWRITE | APPEND_ONLY | FAIL
+  no-primary-key-strategy: FAIL
+  # 表级并发度（1 = 串行）
+  parallelism: 1
+
+  # 备用唯一键（仅无主键且需 upsert 的表才需要，绝大多数表不需要）
+  # 不需要时保持空 map {} 即可，不要留空或写成字符串
+  fallback-keys: {}
+
+  # ===== 安全约束（ddl-forbidden 不可关闭，为 false 直接启动失败）=====
+  safety:
+    ddl-forbidden: true
+    sql-guard-enabled: true
+    allowed-statements: [SELECT, INSERT, TRUNCATE, UPDATE]
+    fail-on-target-table-missing: true
+
+  # ===== 全量覆盖参数 =====
+  full-overwrite:
+    clear-strategy: DELETE     # TRUNCATE | DELETE
+    cascade: false             # 恒为 false，禁止级联清表
+
+  # ===== 重试 =====
+  retry:
+    enabled: false
+    max-attempts: 2
+    backoff-ms: 2000
+
+  # ===== 统计 =====
+  # 同步前后 count(*) 差值估算插入数（顶层字段，不要套在 statistics 下）
+  precise-count: true
